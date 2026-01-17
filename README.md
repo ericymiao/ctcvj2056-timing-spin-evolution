@@ -1,4 +1,5 @@
 # CTCV J2056-3014 X-ray Timing Analysis
+*This project is currently a work-in-progress, and many things are subject to change and may be incomplete*
 
 X-ray timing analysis of the cataclysmic variable **CTCV J2056-3014** using NICER, XMM-Newton, and NuSTAR data.
 
@@ -10,6 +11,7 @@ X-ray timing analysis of the cataclysmic variable **CTCV J2056-3014** using NICE
 - Spin period: P = 29.60968584 ± 0.00000008 s
 - Current Ṗ constraint: (0.0 ± 1.7) × 10⁻¹⁵ s/s
 - Hardness ratio anticorrelated with flux (5.5σ in 2024 data)
+- **Work in progress**: Spin evolution modeling using a variety of torques (transient accretion, magnetic field, gravitational waves, etc.)
 
 ## Project Structure
 
@@ -37,7 +39,3 @@ X-ray timing analysis of the cataclysmic variable **CTCV J2056-3014** using NICE
 2. **04_pint_analysis**: Precision timing to measure spin frequency and derivative
 3. **05_pdot_modeling**: Theoretical Ṗ from accretion torque theory
 4. **06_demodulation**: Orbital motion correction to optimize pulsation detection
-
-## Author
-
-Eric Miao
