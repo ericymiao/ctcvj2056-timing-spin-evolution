@@ -1,0 +1,9 @@
+numpy>=1.20
+scipy>=1.7
+matplotlib>=3.5
+astropy>=5.0
+stingray>=1.1
+hendrics>=7.0
+bokeh>=3.0
+pint-pulsar>=0.9
+nifty-ls>=1.0

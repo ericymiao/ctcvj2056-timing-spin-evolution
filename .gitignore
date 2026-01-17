@@ -1,0 +1,18 @@
+# Data files (too large for git)
+data/*.npy
+data/**/*.npy
+*.fits
+*.evt
+*.nc
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

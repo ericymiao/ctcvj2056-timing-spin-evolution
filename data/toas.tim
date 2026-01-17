@@ -1,0 +1,12 @@
+FORMAT 1
+C Created: 2025-07-18T20:50:22.478851
+C PINT_version: 1.1.3
+C User: ericmiao
+C Host: Erics-Laptop-1481.local
+C OS: macOS-15.1.1-arm64-arm-64bit-Mach-O
+C Python: 3.13.2 | packaged by Anaconda, Inc. | (main, Feb  6 2025, 12:55:35) [Clang 14.0.6 ]
+photon_toa 0.000000 58780.5816243755205712 258316.442 @  -nsrc 5192.84 -nbkg 0.16 -exposure 15761.032186627388 -dphi -0.71917 -htest 194.37 -t XMM
+photon_toa 0.000000 59422.7725288964152026 86850.989 @  -nsrc 109566.71 -nbkg 3.29 -exposure 47605.0994630754 -dphi -0.86085 -htest 944.97 -t NICER
+photon_toa 0.000000 59524.3621949755752469 145405.820 @  -nsrc 45106.65 -nbkg 1.35 -exposure 18507.072545081377 -dphi -0.88546 -htest 424.81 -t NICER
+photon_toa 0.000000 59876.3380848420668158 180358.233 @  -nsrc 16222.51 -nbkg 0.49 -exposure 51156.74090695381 -dphi 0.04499 -htest 560.76 -t XMM
+photon_toa 0.000000 60554.6778225652484664 75150.965 @  -nsrc 194343.17 -nbkg 5.83 -exposure 40089.79410672188 -dphi -0.10739 -htest 1307.89 -t NICER
