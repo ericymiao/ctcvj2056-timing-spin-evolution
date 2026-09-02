@@ -27,9 +27,10 @@ X-ray timing analysis of the cataclysmic variable **CTCV J2056-3014** using NICE
 │   ├── 03_nustar_timing.ipynb  # NuSTAR timing
 │   ├── 04_pint_analysis.ipynb  # Precision timing with PINT
 │   ├── 05_pdot_modeling.ipynb  # Accretion torque modeling
-│   └── 06_demodulation.ipynb   # Orbital demodulation
+│   ├── 06_demodulation.ipynb   # Orbital demodulation
+│   └── paper_figures.ipynb     # Additional paper figures
 ├── data/                       # TOAs, timing models
-├── figures/                    # Publication figures
+├── paper_figures/              # Publication figures
 └── wd_mass_radius/             # WD mass-radius tables
 ```
 
@@ -39,3 +40,4 @@ X-ray timing analysis of the cataclysmic variable **CTCV J2056-3014** using NICE
 2. **04_pint_analysis**: Precision timing to measure spin frequency and derivative
 3. **05_pdot_modeling**: Theoretical Ṗ from accretion torque theory
 4. **06_demodulation**: Orbital motion correction to optimize pulsation detection
+5. **paper_figures**: Additional figures for the paper (initial frequency refinement)
