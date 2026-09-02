@@ -1,0 +1,10 @@
+FORMAT 1
+C Created: 2025-07-15T14:53:54.206751
+C PINT_version: 1.1.3
+C User: ericmiao
+C Host: Erics-Laptop-1481.local
+C OS: macOS-10.16-x86_64-i386-64bit-Mach-O
+C Python: 3.13.5 | packaged by Anaconda, Inc. | (main, Jun 12 2025, 11:09:21) [Clang 14.0.6 ]
+photon_toa 0.000000 59421.6117872625295619 146793.727 @  -nsrc 20049.40 -nbkg 0.60 -exposure 15717.261673241854 -dphi -0.86300 -htest 389.48 -t NICER -group obs1
+photon_toa 0.000000 59422.9109812508386417 164271.861 @  -nsrc 21961.34 -nbkg 0.66 -exposure 15672.288089483976 -dphi -0.86188 -htest 260.39 -t NICER -group obs1
+photon_toa 0.000000 59424.3119590459724939 221547.146 @  -nsrc 19043.43 -nbkg 0.57 -exposure 15133.234324753284 -dphi -0.85929 -htest 273.53 -t NICER -group obs1
