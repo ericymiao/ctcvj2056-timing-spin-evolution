@@ -1,0 +1,12 @@
+diff --git a/scripts/photon_toa.py b/scripts/photon_toa.py
+index de94713..466b465 100755
+--- a/scripts/photon_toa.py
++++ b/scripts/photon_toa.py
+@@ -407,7 +407,6 @@ elif hdr["TELESCOP"].startswith("XMM"):
+         ephem=args.ephem,
+         planets=planets,
+         include_bipm=args.use_bipm,
+-        include_gps=args.use_gps,
+     )
+     with pyfits.open(args.eventname) as f:
+         mets = f["events"].data.field("time")

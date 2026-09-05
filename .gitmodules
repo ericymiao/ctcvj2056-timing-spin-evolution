@@ -1,0 +1,4 @@
+[submodule "external/NICERsoft"]
+	path = external/NICERsoft
+	url = https://github.com/paulray/NICERsoft.git
+	ignore = dirty

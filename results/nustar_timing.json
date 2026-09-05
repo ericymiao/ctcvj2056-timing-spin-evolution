@@ -1,0 +1,30 @@
+{
+  "table1": {
+    "FPMA": {
+      "good_time_ks": 28.157018795669078,
+      "source_counts": 2417,
+      "bkg_counts_scaled": 127.36,
+      "net_counts": 2289.64
+    },
+    "FPMB": {
+      "good_time_ks": 28.179016615271568,
+      "source_counts": 2287,
+      "bkg_counts_scaled": 105.52,
+      "net_counts": 2181.48
+    }
+  },
+  "table2": {
+    "FPMA": {
+      "peak_Hz": 0.03377014652014652,
+      "plus_Hz": 6.349206349211267e-06,
+      "minus_Hz": 6.349206349204328e-06,
+      "peak_power": 29.107479853281976
+    },
+    "FPMB": {
+      "peak_Hz": 0.03376959706959707,
+      "plus_Hz": 5.067155067157991e-06,
+      "minus_Hz": 5.189255189254338e-06,
+      "peak_power": 34.81475909801922
+    }
+  }
+}

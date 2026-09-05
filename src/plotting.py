@@ -1,188 +1,316 @@
-"""Bokeh visualization utilities for X-ray timing analysis."""
+"""The figures of the paper (matplotlib). Each function returns the Figure; the notebooks save it.
+
+Fonts and tick styling follow the paper: `paper_style()` returns the rcParams used by every
+figure, and each function applies them through `plt.rc_context`. Pass `path=` to save the figure:
+tick labels are created when the figure is drawn, so the file must be written inside the same
+context for the styling to be complete.
+"""
 
 import numpy as np
-from astropy.time import Time, TimeDelta
-from bokeh.models import ColumnDataSource, Range1d, LinearAxis
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FormatStrFormatter, ScalarFormatter, FuncFormatter
+from matplotlib.gridspec import GridSpec
+import matplotlib.ticker as ticker
 
 
-def set_axis_styles(fig, font_size='14pt'):
-    """Set consistent styling for Bokeh figures.
+def paper_style(fontsize=13):
+    """rcParams used throughout the paper (inward ticks on all sides, constrained layout)."""
+    return {'font.size': fontsize, 'axes.labelsize': fontsize, 'xtick.labelsize': fontsize, 'ytick.labelsize': fontsize,
+            'xtick.direction': 'in', 'ytick.direction': 'in', 'xtick.top': True, 'ytick.right': True,
+            'xtick.minor.visible': True, 'ytick.minor.visible': True, 'figure.constrained_layout.use': True}
 
-    Args:
-        fig: Bokeh figure to style
-        font_size: font size for labels (default '14pt')
+
+# ---------------------------------------------------------------------------------------------
+# Periodograms (Figure 1 and Figure 9)
+# ---------------------------------------------------------------------------------------------
+
+def plot_periodogram(curves, figsize=(5, 3.6), xfmt=None, path=None):
+    """Z^2 periodogram(s) in mHz.
+
+    curves: list of dicts with 'frequency' (Hz), 'power', 'color', 'lw' and optionally
+            'span' = (f_lo, f_hi, alpha) drawn as a shaded frequency-uncertainty band.
+    xfmt:   e.g. '%.3f' to fix the tick label format.
     """
-    fig.xaxis.axis_label_text_font_size = font_size
-    fig.xaxis.major_label_text_font_size = font_size
-    fig.yaxis.axis_label_text_font_size = font_size
-    fig.yaxis.major_label_text_font_size = font_size
-
-    fig.xaxis.major_label_text_font = 'Georgia'
-    fig.xaxis.axis_label_text_font = 'Georgia'
-    fig.yaxis.major_label_text_font = 'Georgia'
-    fig.yaxis.axis_label_text_font = 'Georgia'
-
-    fig.xaxis.axis_label_text_font_style = 'normal'
-    fig.yaxis.axis_label_text_font_style = 'normal'
-
-    if fig.title:
-        fig.title.align = 'center'
-        fig.title.text_font = 'Georgia'
-        fig.title.text_font_size = font_size
-        fig.title.text_font_style = 'bold'
+    with plt.rc_context(paper_style()):
+        fig, ax = plt.subplots(figsize=figsize)
+        for c in curves:
+            ax.plot(c['frequency'] * 1e3, c['power'], lw=c.get('lw', 1), color=c.get('color'))
+            if c.get('span') is not None:
+                f_lo, f_hi, alpha = c['span']
+                ax.axvspan(f_lo * 1e3, f_hi * 1e3, alpha=alpha, color='darkviolet')
+        ax.set_xlabel('Frequency (mHz)')
+        ax.set_ylabel('Power')
+        ax.ticklabel_format(axis='x', useOffset=False)
+        if xfmt is not None:
+            ax.xaxis.set_major_formatter(FormatStrFormatter(xfmt))
+        if path is not None:
+            fig.savefig(path)
+    return fig
 
 
-def plot_lightcurve(p, lc, time_format='mjd', mjd_ref=None, gti=None, color='darkviolet', line_width=2):
-    """Add lightcurve to Bokeh plot with gap handling.
+def plot_hires_periodogram(frequency, power, power_threshold, span_uhz=(33772.27, 33773.19),
+                           xlim_uhz=(33771.75, 33773.75), ylim=(1050, 1800), path=None):
+    """High-resolution combined periodogram in microhertz with the 2-sigma power threshold (Figure 9, top right)."""
+    with plt.rc_context(paper_style()):
+        fig, ax = plt.subplots(figsize=(6.5, 4.3))
+        ax.plot(frequency * 1e6, power, lw=1.5)
+        ax.axvspan(span_uhz[0], span_uhz[1], alpha=0.15, color='darkviolet')
+        ax.axhline(power_threshold, alpha=0.6, color='darkviolet', lw=2, ls='--')
+        ax.set_xlim(*xlim_uhz)
+        ax.set_ylim(*ylim)
+        ax.set_xlabel(r'Frequency ($\mu\text{Hz}$)')
+        ax.set_ylabel('Power')
+        ax.ticklabel_format(axis='x', useOffset=True)
+        ax.xaxis.set_major_formatter(ScalarFormatter(useOffset=True))
+        if path is not None:
+            fig.savefig(path)
+    return fig
 
-    Args:
-        p: Bokeh figure
-        lc: Stingray Lightcurve object
-        time_format: 'mjd', 'utc', or 'seconds'
-        mjd_ref: reference MJD for 'seconds' format
-        gti: GTI array (uses lc.gti if None)
-        color: line color
-        line_width: line width
 
-    Returns: the figure
+# ---------------------------------------------------------------------------------------------
+# Folded profiles (Figures 2 and 3)
+# ---------------------------------------------------------------------------------------------
+
+def plot_folded_profiles(profiles, lw=2, alpha=0.35, ylim_top=None, figsize=(5, 3.6), path=None):
+    """Step profiles over two cycles with shaded 1-sigma bands.
+
+    profiles: list of (ext_phase, ext_rate, ext_err, color) already extended to [0, 2].
     """
-    if time_format not in ['mjd', 'utc', 'seconds']:
-        raise ValueError(f"time_format must be 'mjd', 'utc', or 'seconds', got '{time_format}'")
-
-    if time_format == 'seconds' and mjd_ref is None:
-        mjd_ref = lc.mjdref
-        print(f"Using lightcurve MJD reference: {mjd_ref}")
-
-    if gti is None and hasattr(lc, 'gti') and lc.gti is not None:
-        gti = lc.gti
-
-    lc_time = np.asarray(lc.time, dtype=np.float64)
-    lc_countrate = np.asarray(lc.countrate, dtype=np.float64)
-
-    def convert_time(time_sec):
-        if time_format == 'mjd':
-            return lc.mjdref + time_sec / 86400.0
-        elif time_format == 'utc':
-            t = Time(lc.mjdref, format='mjd') + TimeDelta(time_sec, format='sec')
-            return t.to_datetime()
-        else:
-            return ((lc.mjdref + time_sec / 86400.0) - mjd_ref) * 86400.0
-
-    if gti is not None:
-        gti_array = np.asarray(gti, dtype=np.float64)
-        for gti_start, gti_stop in gti_array:
-            mask = (lc_time >= gti_start) & (lc_time <= gti_stop)
-            if not np.any(mask):
-                continue
-            x_values = convert_time(lc_time[mask])
-            source = ColumnDataSource(data=dict(x=x_values, y=lc_countrate[mask]))
-            p.step('x', 'y', source=source, line_width=line_width, color=color, mode='center')
-    else:
-        x_values = convert_time(lc_time)
-        y_values = np.where(lc_countrate == 0, np.nan, lc_countrate)
-        source = ColumnDataSource(data=dict(x=x_values, y=y_values))
-        p.step('x', 'y', source=source, line_width=line_width, color=color, mode='center')
-
-    return p
+    with plt.rc_context(paper_style()):
+        fig, ax = plt.subplots(figsize=figsize)
+        for ext_phase, ext_rate, ext_err, color in profiles:
+            ax.step(ext_phase, ext_rate, where='mid', color=color, lw=lw)
+            ax.fill_between(ext_phase, ext_rate - ext_err, ext_rate + ext_err, step='mid', color=color, alpha=alpha)
+        if ylim_top is not None:
+            ax.set_ylim(top=ylim_top)
+        ax.set_xlabel('Phase')
+        ax.set_ylabel('Count Rate (cnts/s)')
+        if path is not None:
+            fig.savefig(path)
+    return fig
 
 
-def plot_folded_lightcurve(p, phase, countrate, err, n_bins, color='firebrick',
-                           match_axis_color=False, scale_factor=None, line_alpha=1):
-    """Plot folded lightcurve with error bars.
+def plot_folded_hr(ext_phase, total, total_err, hr, hr_err, path=None):
+    """Background-subtracted total rate (red, left axis) with the hardness ratio (black, right axis) (Figure 3)."""
+    with plt.rc_context(paper_style()):
+        fig, ax = plt.subplots(figsize=(5, 3.6))
+        ext_total = np.concatenate([total, total])
+        ext_total_err = np.concatenate([total_err, total_err])
+        ax.step(ext_phase, ext_total, where='mid', color='firebrick', lw=2, alpha=0.5)
+        ax.fill_between(ext_phase, ext_total - ext_total_err, ext_total + ext_total_err, step='mid', color='firebrick', alpha=0.08)
+        ax.set_xlabel('Phase')
+        ax.set_ylabel('Count Rate (cnts/s)', color='firebrick')
+        ax.tick_params(axis='y', labelcolor='firebrick')
+        ax.set_ylim(np.min(total) - 2 * np.max(total_err), np.max(total) + 2 * np.max(total_err))
 
-    Args:
-        p: Bokeh figure
-        phase: phase bin edges from fold() (n_bins+1)
-        countrate: count rate per bin
-        err: count rate errors
-        n_bins: number of phase bins
-        color: line and error bar color
-        match_axis_color: match y-axis label to data color
-        scale_factor: scale y-range based on max error
-        line_alpha: line transparency
+        ext_hr = np.concatenate([hr, hr])
+        ext_hr_err = np.concatenate([hr_err, hr_err])
+        ax2 = ax.twinx()
+        ax2.step(ext_phase, ext_hr, where='mid', color='black', lw=2)
+        ax2.fill_between(ext_phase, ext_hr - ext_hr_err, ext_hr + ext_hr_err, step='mid', color='black', alpha=0.45)
+        ax2.set_ylabel('Hardness Ratio')
+        ax2.set_ylim(np.min(hr) - 2 * 0.1, np.max(hr) + 2 * 0.1)
+        if path is not None:
+            fig.savefig(path)
+    return fig
+
+
+# ---------------------------------------------------------------------------------------------
+# Template (Figure 6)
+# ---------------------------------------------------------------------------------------------
+
+def plot_template(phases, template, nbins=50, path=None):
+    """Folded photon phases (blue) with the Gaussian template (red) and fractional residuals (green)."""
+    bins = np.linspace(0, 1, nbins + 1)
+    bcs = (bins[1:] + bins[:-1]) / 2.0
+    cod = np.histogram(phases, bins=bins, density=True)[0]
+    err = (cod * float(nbins) / len(phases)) ** 0.5
+    with plt.rc_context(paper_style()):
+        fig, ax = plt.subplots(figsize=(7 / 1.2, 5 / 1.2))
+
+        # Fractional residuals on the right axis, drawn first so that they sit behind the profile
+        ax_resid = ax.twinx()
+        model = template(bcs)
+        ax_resid.errorbar(bcs, cod / model - 1, yerr=err / model, color='green', ls=' ', marker='o', alpha=0.2)
+        ax_resid.axhline(0, color='green', lw=1, alpha=0.7)
+        ax_resid.set_ylabel(r'Fractional Residuals ($\times 10^{-2}$)', color='green')
+        ax_resid.tick_params(axis='y', labelcolor='green')
+        ax_resid.yaxis.set_major_formatter(FuncFormatter(lambda x, pos: f'{x*100:.0f}'))
+        ax_resid.set_xlim(0, 1)
+
+        ax.step(bcs, cod, where='mid', color='blue', lw=1)
+        ax.fill_between(bcs, cod - err, cod + err, step='mid', color='blue', alpha=0.15)
+        dom = np.linspace(0, 1, 1000)
+        ax.plot(dom, template(dom), color='red', lw=2)
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0.65, 1.4)
+        ax.set_xlabel('Phase')
+        ax.set_ylabel('Profile Amplitude')
+        ax.set_zorder(ax_resid.get_zorder() + 1)
+        ax.patch.set_visible(False)
+        if path is not None:
+            fig.savefig(path)
+    return fig
+
+
+# ---------------------------------------------------------------------------------------------
+# Orbital Roemer-delay search (Figure 4)
+# ---------------------------------------------------------------------------------------------
+
+def plot_demod_projection(Ts, max_powers, z2_null, z2_max, span=(6200, 6240), path=None):
+    """Maximum Z^2 versus trial orbital period with the unmodulated value (red) and the candidate range shaded."""
+    with plt.rc_context(paper_style()):
+        fig, ax = plt.subplots(figsize=(5.7 / 1.1, 3.6 / 1.1))
+        ax.plot(Ts, max_powers, lw=2)
+        ax.axhline(z2_null, alpha=0.8, lw=2, color='red')
+        ax.set_xlabel('Period (s)')
+        ax.set_ylabel(r'Max $Z^2$ Power')
+        ax.set_ylim(z2_null - 5, top=z2_max + 15)
+        ax.axvspan(span[0], span[1], alpha=0.15, color='darkviolet')
+        if path is not None:
+            fig.savefig(path)
+    return fig
+
+
+def plot_survival(sorted_z2, survival, x_fit_start, slope, intercept, observed_z2, z2_null, path=None):
+    """Survival function of the control distribution with its exponential tail fit and the observed peak."""
+    with plt.rc_context(paper_style()):
+        fig, ax = plt.subplots(figsize=(4, 3.6))
+        ax.step(sorted_z2, survival, alpha=1, lw=2.5, where='post')
+        x_extrap = np.linspace(x_fit_start, max(observed_z2 * 1.1, sorted_z2[-1] * 1.1), 200)
+        ax.semilogy(x_extrap, np.exp(slope * x_extrap + intercept), 'xkcd:bright red', lw=1.5)
+        ax.axvline(observed_z2, color='blue', lw=1.5, ls=(0, (3, 2)))
+        ax.set_xlabel(r'Max $Z^2$ Power')
+        ax.set_xlim(np.floor(z2_null), right=observed_z2 + 10)
+        ax.set_ylim(bottom=1e-5, top=2)
+        ax.set_ylabel('Survival Function')
+        if path is not None:
+            fig.savefig(path)
+    return fig
+
+
+# ---------------------------------------------------------------------------------------------
+# Pulsar timing residuals (Figures 7, 8, 9 bottom, 11, 12) and the initial-frequency chart (Figure 10)
+# ---------------------------------------------------------------------------------------------
+
+def plot_toa_residuals(mjds, resids, errs, zero_line=False, ylim=None, path=None):
+    """Residuals of the five TOAs, one panel (Figure 11)."""
+    with plt.rc_context(paper_style()):
+        fig, ax = plt.subplots(figsize=(7, 2.5))
+        ax.scatter(mjds, resids, marker='x', s=150, linewidths=2.5, color='firebrick', zorder=5)
+        ax.bar(mjds, height=2 * errs, bottom=resids - errs, width=60, alpha=0.2, color='firebrick', edgecolor='none')
+        if zero_line:
+            ax.axhline(0, color='gray', ls='--')
+        if ylim is not None:
+            ax.set_ylim(*ylim)
+        ax.set_xlabel('MJD')
+        ax.set_ylabel('Residuals (s)')
+        if path is not None:
+            fig.savefig(path)
+    return fig
+
+
+def plot_prefit_montage(panels, path=None):
+    """Three stacked pre-fit residual panels for successive initial models (Figure 7).
+
+    panels: list of (label, mjds, resids, errs).
     """
-    phase = phase[1:] - np.diff(phase) / 2
-
-    extended_phase = np.concatenate([phase, phase + 1])
-    extended_rate = np.concatenate([countrate, countrate])
-    extended_err = np.concatenate([err, err])
-
-    if scale_factor is not None:
-        rate_min = np.min(extended_rate) - scale_factor * np.max(extended_err)
-        rate_max = np.max(extended_rate) + scale_factor * np.max(extended_err)
-        p.y_range.start = rate_min
-        p.y_range.end = rate_max
-
-    source = ColumnDataSource(data=dict(
-        x=extended_phase,
-        y=extended_rate,
-        yerr=extended_err,
-        err_bottom=extended_rate - extended_err,
-        err_top=extended_rate + extended_err
-    ))
-    alpha_ratio = 0.4
-
-    p.step('x', 'y', source=source, alpha=line_alpha, line_width=2, color=color, mode='center')
-    p.vbar('x', width=1 / n_bins, top='err_top', bottom='err_bottom',
-           source=source, color=color, line_color=None, alpha=line_alpha * alpha_ratio)
-
-    if match_axis_color:
-        p.yaxis.axis_label_text_color = color
-        p.yaxis.major_label_text_color = color
+    with plt.rc_context(paper_style(12)):
+        fig, axes = plt.subplots(3, 1, figsize=(7, 7.5), sharex=True)
+        for ax, (label, t, r, e) in zip(axes, panels):
+            ax.scatter(t, r, marker='x', s=150, linewidths=2.5, color='firebrick', zorder=5)
+            ax.bar(t, height=2 * e, bottom=r - e, width=60, alpha=0.2, color='firebrick', edgecolor='none')
+            span = np.max(r) - np.min(r)
+            ax.set_ylim(np.min(r) - 0.15 * span, np.max(r) + 0.35 * span)
+            ax.set_ylabel('Residuals (s)')
+            ax.text(0.02, 0.92, label, transform=ax.transAxes, fontsize=11, va='top')
+        axes[-1].set_xlabel('MJD')
+        if path is not None:
+            fig.savefig(path)
+    return fig
 
 
-def plot_hardness_ratio(p, phase, soft_countrate, soft_err, hard_countrate, hard_err, n_bins,
-                        hr_color='black', scale_factor=6.0, line_width=2, line_alpha=1):
-    """Plot hardness ratio on secondary y-axis.
+def plot_within_residuals(mjds, resids, errs, bar_width, ylim=(-0.2, 0.2), path=None):
+    """Residuals of the three within-observation TOAs, one small panel (Figure 8)."""
+    with plt.rc_context(paper_style(12)):
+        fig, ax = plt.subplots(figsize=(4 / 1.2, 3 / 1.2))
+        ax.set_ylim(*ylim)
+        ax.scatter(mjds, resids, marker='x', s=200, linewidths=3, zorder=5)
+        ax.bar(mjds, height=2 * errs, bottom=resids - errs, width=bar_width, alpha=0.2, edgecolor='none', color='#1f77b4')
+        ax.axhline(0, color='gray', ls='--', lw=0.8)
+        ax.set_xlabel('MJD')
+        ax.set_ylabel('Residuals (s)')
+        if path is not None:
+            fig.savefig(path)
+    return fig
 
-    Args:
-        p: Bokeh figure
-        phase: phase bin edges (n_bins+1)
-        soft_countrate, soft_err: soft band rates and errors
-        hard_countrate, hard_err: hard band rates and errors
-        n_bins: number of phase bins
-        hr_color: HR line color
-        scale_factor: HR axis range scaling
-        line_width: line width
-        line_alpha: line transparency
 
-    Returns: (HR, HR_error) arrays
+def plot_resid_slopes_montage(panels, bar_width, path=None):
+    """Within-observation pre-fit residuals for the five candidate aliases (Figure 9, bottom).
+
+    panels: dict label -> (mjds, resids, errs, f0) for 'leftpeak2', 'leftpeak', 'rightpeak', 'rightpeak2', 'center'.
     """
-    phase = phase[1:] - np.diff(phase) / 2
+    with plt.rc_context(paper_style(12)):
+        fig = plt.figure(figsize=(9, 5.2))
+        gs = GridSpec(2, 3, figure=fig)
+        positions = {'leftpeak2': gs[0, 0], 'leftpeak': gs[0, 1], 'rightpeak': gs[1, 0], 'rightpeak2': gs[1, 1], 'center': gs[:, 2]}
+        for label, pos in positions.items():
+            mjds, resids, errs, f0 = panels[label]
+            ax = fig.add_subplot(pos)
+            ax.scatter(mjds, resids, marker='x', s=200, linewidths=3, zorder=5)
+            ax.bar(mjds, height=2 * errs, bottom=resids - errs, width=bar_width, alpha=0.2, edgecolor='none', color='#1f77b4')
+            ax.axhline(0, color='gray', ls='--', lw=0.8)
+            ax.set_ylim(-1.5, 1.5)
+            ax.set_xlabel('MJD')
+            ax.set_ylabel('Residuals (s)')
+            ax.set_title(f'{label}: $f$ = {f0:.8f} Hz', fontsize=11)
+        if path is not None:
+            fig.savefig(path)
+    return fig
 
-    HR = (hard_countrate - soft_countrate) / (hard_countrate + soft_countrate)
-    HR_error = (2 * np.sqrt(hard_countrate**2 * soft_err**2 + soft_countrate**2 * hard_err**2)) / (hard_countrate + soft_countrate)**2
 
-    extended_phase = np.concatenate([phase, phase + 1])
-    extended_HR = np.concatenate([HR, HR])
-    extended_HR_error = np.concatenate([HR_error, HR_error])
+def plot_error_ellipse(corr, sigmas, x_scale=1e-10, y_scale=1e-18, path=None):
+    """1, 2 and 3 sigma joint confidence ellipses of (F0, F1) with the marginal 1-sigma bands (Figure 12)."""
+    from scipy import linalg, stats
+    vals, vecs = linalg.eigh(corr)
+    with plt.rc_context(paper_style()):
+        fig, ax = plt.subplots(figsize=(5.7, 4.3))
+        colors = {1: 'salmon', 2: 'indianred', 3: 'maroon'}
+        for n_sigma in [3, 2, 1]:
+            thresh = np.sqrt(stats.chi2(2).isf(2 * stats.norm.cdf(-n_sigma)))
+            angles = np.linspace(0, 2 * np.pi, 200)
+            points = thresh * (np.sqrt(vals[0]) * np.cos(angles)[:, None] * vecs[None, :, 0]
+                               + np.sqrt(vals[1]) * np.sin(angles)[:, None] * vecs[None, :, 1])
+            ax.plot(points[:, 0] * sigmas[0] / x_scale, points[:, 1] * sigmas[1] / y_scale,
+                    label=f'{n_sigma} sigma', color=colors[n_sigma], lw=2)
+        ax.axvspan(-sigmas[0] / x_scale, sigmas[0] / x_scale, alpha=0.2, color='cornflowerblue')
+        ax.axhspan(-sigmas[1] / y_scale, sigmas[1] / y_scale, alpha=0.2, color='cornflowerblue')
+        ax.set_xlabel(r'$\Delta$ F0 ($\times 10^{-10}$ Hz)')
+        ax.set_ylabel(r'$\Delta$ F1 ($\times 10^{-18}$ Hz/s)')
+        ax.legend(loc='upper right')
+        if path is not None:
+            fig.savefig(path)
+    return fig
 
-    hr_source = ColumnDataSource(data=dict(
-        x=extended_phase,
-        hr=extended_HR,
-        hr_err_bottom=extended_HR - extended_HR_error,
-        hr_err_top=extended_HR + extended_HR_error
-    ))
 
-    hr_min = np.min(HR) - scale_factor * 0.1
-    hr_max = np.max(HR) + scale_factor * 0.1
-
-    p.extra_y_ranges['hr'] = Range1d(hr_min, hr_max)
-
-    alpha_ratio = 0.5
-    p.step('x', 'hr', source=hr_source, line_width=2, alpha=line_alpha, color=hr_color,
-           mode='center', y_range_name='hr')
-    p.vbar('x', width=1 / n_bins, top='hr_err_top', bottom='hr_err_bottom',
-           source=hr_source, color=hr_color, line_color=None, alpha=line_alpha * alpha_ratio, y_range_name='hr')
-
-    ax2 = LinearAxis(y_range_name="hr", axis_label="Hardness Ratio")
-    ax2.axis_label_text_color = hr_color
-    ax2.major_label_text_color = hr_color
-    ax2.axis_label_text_font_size = "12pt"
-    ax2.axis_label_text_font_style = 'normal'
-    ax2.major_label_text_font_size = "12pt"
-    ax2.major_label_text_font = 'Georgia'
-    ax2.axis_label_text_font = 'Georgia'
-    p.add_layout(ax2, 'right')
-
-    return HR, HR_error
+def plot_initial_frequency(labels, freqs, uncerts, delta_f, path=None):
+    """Successive initial-frequency estimates with their uncertainties and the tolerable error band (Figure 10)."""
+    F_final = freqs[-1]
+    with plt.rc_context(dict(matplotlib.rcParamsDefault)):
+        fig, ax = plt.subplots(figsize=(13, 3))
+        ax.axvspan(F_final - delta_f, F_final + delta_f, color='C2', alpha=0.15, label=r'Max tolerable $\Delta f$')
+        ax.axvline(F_final, color='k', linestyle='--', linewidth=1.5)
+        y_pos = np.arange(len(labels))[::-1]
+        for i in range(len(labels)):
+            ax.barh(y_pos[i], width=2 * uncerts[i], left=freqs[i] - uncerts[i], height=0.4, color='C0', alpha=0.3)
+        ax.scatter(freqs, y_pos, marker='x', color='C0', s=200, zorder=5, linewidths=2.5)
+        ax.set_yticks(y_pos)
+        ax.set_yticklabels(labels, fontsize=13)
+        ax.set_xlabel(r'$F$ (Hz)', fontsize=14)
+        ax.tick_params(axis='x', labelsize=14)
+        ax.grid(axis='x', alpha=0.3)
+        fig.tight_layout()
+        if path is not None:
+            fig.savefig(path, bbox_inches='tight', dpi=300)
+    return fig

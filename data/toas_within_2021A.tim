@@ -1,0 +1,5 @@
+FORMAT 1
+C Three TOAs within NICER 2021A (0.4-2 keV, count-rate cut, tint 15 ks), pipeline/02_make_toas.sh 2026-09-05
+photon_toa 0.000000 59421.6117872625295619 146793.727 @  -nsrc 20049.40 -nbkg 0.60 -exposure 15717.261673241854 -dphi -0.86300 -htest 389.48 -t NICER -group obs1
+photon_toa 0.000000 59422.9109812508386417 164271.861 @  -nsrc 21961.34 -nbkg 0.66 -exposure 15672.288089483976 -dphi -0.86188 -htest 260.39 -t NICER -group obs1
+photon_toa 0.000000 59424.3119590459724939 221547.146 @  -nsrc 19043.43 -nbkg 0.57 -exposure 15133.234324753284 -dphi -0.85929 -htest 273.53 -t NICER -group obs1
