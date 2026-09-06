@@ -1,5 +1,5 @@
 #!/bin/bash
-# Rebuild everything: TOAs, then the notebooks (figures in paper_figures/, numbers in results/).
+# Rebuild everything: TOAs, then the notebooks (figures in paper_figures/, numbers printed in the notebooks).
 set -e
 cd "$(dirname "$0")/.."
 PY="${CTCV_PYTHON:-/opt/miniconda3/envs/CTCV_PINT/bin/python}"

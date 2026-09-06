@@ -22,7 +22,6 @@ NUSTAR_DIR = f'{DATA_ROOT}/nustar/30801006002/event_cl'
 # Repository folders
 DATA_DIR = os.path.join(REPO, 'data')
 EVENTS_DIR = os.path.join(DATA_DIR, 'events')      # products of pipeline/01_prepare_events.py
-RESULTS_DIR = os.path.join(REPO, 'results')        # numbers quoted in the paper (JSON)
 FIGURE_DIR = os.path.join(REPO, 'paper_figures')   # figures of the paper
 
 # ---------------------------------------------------------------------------------------------
