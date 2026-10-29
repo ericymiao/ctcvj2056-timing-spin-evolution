@@ -1,0 +1,36 @@
+# Created: 2026-10-29T02:28:59.478518
+# PINT_version: 1.1.3
+# User: ericmiao
+# Host: MacBook-Pro-1540.local
+# OS: macOS-26.6.2-x86_64-i386-64bit-Mach-O
+# Python: 3.13.5 | packaged by Anaconda, Inc. | (main, Jun 12 2025, 11:09:21) [Clang 14.0.6 ]
+# Format: pint
+# read_time: 2026-10-29T02:28:58.852112
+# allow_tcb: False
+# convert_tcb: False
+# allow_T2: False
+# original_name: /Users/ericmiao/Documents/Kaya Research/CTCV_J2056/Code/ctcv-j2056-timing/data/timing_model_centerpeak.par
+EPHEM                               DE440
+CLOCK                        TT(BIPM2023)
+UNITS                                 TDB
+START              58780.5816243619986371
+FINISH             60554.6778226033007142
+DILATEFREQ                              N
+DMDATA                                  N
+NTOA                                    5
+CHI2                    1.253792709312396
+CHI2R                   1.253792709312396
+TRES                 63680.07429612164558
+RAJ                     20:56:52.15000000
+DECJ                   -30:14:39.10000000
+PMRA                                  0.0
+PMDEC                                 0.0
+PX                                    0.0
+F0                0.033772732505016309814 1 8.761767941354615687e-11
+F1              2.5345989613507395505e-19 1 2.0538945872539721473e-18
+PEPOCH             59460.0000000000000000
+TZRMJD             59420.0000000000000000
+TZRSITE                               ssb
+TZRFRQ                                inf
+PHOFF                 0.13990450552837727 1 0.0023876727080791187
+PLANET_SHAPIRO                          N

@@ -1,11 +1,12 @@
 #!/bin/bash
 # Times of arrival with NICERsoft photon_toa.py (submodule external/NICERsoft, PINT 1.1.3).
 #
-# One TOA per observation from the cleaned, barycentered source event files, using the Gaussian
-# template data/template.gauss and the initial model data/photon_toa_initial_model.par; --tint
-# is the good time accumulated (whole GTIs) into the TOA and --maxint the maximum time span.
-# The three within-observation TOAs of NICER 2021A use the 0.4-2 keV, count-rate-cut file made
-# by pipeline/01_prepare_events.py.
+# One TOA per observation from the cleaned, barycentered source event files restricted to the
+# energy bands of Section 3 of the paper (0.3-10 keV; 0.3-7 keV for NICER 2021A) by
+# pipeline/01_prepare_events.py, using the Gaussian template data/template.gauss and the initial
+# model data/photon_toa_initial_model.par; --tint is the good time accumulated (whole GTIs) into
+# the TOA and --maxint the maximum time span. The three within-observation TOAs of NICER 2021A
+# use the 0.4-2 keV, count-rate-cut file made by the same script.
 #
 # Run:  bash pipeline/02_make_toas.sh        (about 10 minutes)
 set -e
@@ -31,11 +32,11 @@ toa() {   # name tint maxint minexp eventfile
     "$PY" $PHOTON_TOA --ephem DE440 --tint "$2" --maxint "$3" --minexp "$4" --outfile "data/toas/$1.tim" "$5" $TEMPLATE $PAR > "data/toas/$1.log" 2>&1
     grep '^photon_toa' "data/toas/$1.tim"
 }
-toa xmm2019_pn    15000  864000  0 "$XMM/0842570101/pn_clean_src_bary.evt"
-toa nicer2021A    50000  864000  0 "$NICER/ni4592010200_0mpu7_cl_bary.evt"
-toa nicer2021B    30000  864000  0 "$NICER/ni4592010300_0mpu7_cl_bary.evt"
-toa xmm2022_pn    15000  864000  0 "$XMM/0902500101/pn_clean_src.evt"
-toa nicer2024    100000 8640000  0 "$NICER/ni7656010100_0mpu7_cl_bary.evt"
+toa xmm2019_pn    15000  864000  0 data/events/xmm2019_pn_0.3-10keV.evt
+toa nicer2021A    50000  864000  0 data/events/nicer2021A_0.3-7keV.evt
+toa nicer2021B    30000  864000  0 data/events/nicer2021B_0.3-10keV.evt
+toa xmm2022_pn    15000  864000  0 data/events/xmm2022_pn_0.3-10keV.evt
+toa nicer2024    100000 8640000  0 data/events/nicer2024_0.3-10keV.evt
 toa within_2021A  15000  864000 2000 data/events/nicer2021A_0.4-2keV_crcut.evt
 
 # Assemble data/toas.tim (five TOAs) and data/toas_within_2021A.tim (three TOAs, -group obs1)

@@ -53,7 +53,7 @@ NUSTAR_BKG_AREA_FACTOR = (40**2) / (200**2)
 # ---------------------------------------------------------------------------------------------
 # Timing constants and pulsar-timing files
 # ---------------------------------------------------------------------------------------------
-P_SPIN = 29.60968584                 # spin period (s) used for folding and for the orbital search
+P_SPIN = 29.60968584                 # spin period (s) used for folding
 F_SPIN = 1.0 / P_SPIN
 FOLD_EPOCH_NICER = 59230             # MJD of phase zero for the folded NICER profiles
 FOLD_EPOCH_XMM_NUSTAR = 58780

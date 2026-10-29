@@ -1,9 +1,11 @@
-"""Prepare the event file used for the within-observation TOAs of NICER 2021A.
+"""Prepare the energy-filtered event files used for the TOAs.
 
-The five TOAs of the paper are made directly from the cleaned, barycentered source event files
-(pipeline/02_make_toas.sh). The three within-observation TOAs that refine the initial frequency
+The five TOAs of the paper (pipeline/02_make_toas.sh) use the cleaned, barycentered source event
+files restricted to the energy bands of Section 3 of the paper: 0.3-10 keV for NICER 2021B, NICER
+2024 and the two XMM-Newton pn observations, and 0.3-7 keV for NICER 2021A (NICER PI is in 10 eV
+channels, XMM PI in eV). The three within-observation TOAs that refine the initial frequency
 use the 2021A observation restricted to 0.4-2 keV (PI 40-200) with a count-rate cut (5 s bins,
-rate below 9 c/s; GTI table in data/gti/). This script writes that file to data/events/.
+rate below 9 c/s; GTI table in data/gti/). This script writes these files to data/events/.
 
 Run:  python pipeline/01_prepare_events.py
 """
@@ -28,7 +30,21 @@ for key, path in config.EVENT_FILES.items():
     print(f'{key:12s} {os.path.basename(path):32s} {events.header["NAXIS2"]:7d} events, GTI {np.sum(gti[:, 1] - gti[:, 0]):.1f} s, {info["TIMESYS"]}/{info["TIMEREF"]}')
     hdul.close()
 
-# NICER 2021A, 0.4-2 keV
+# Energy bands of Section 3 of the paper for the five TOAs: (PI low, PI high, label)
+TOA_BANDS = {
+    'nicer2021A': (30, 700, '0.3-7keV'),      # PI 30-700 (10 eV channels)
+    'nicer2021B': (30, 1000, '0.3-10keV'),
+    'nicer2024': (30, 1000, '0.3-10keV'),
+    'xmm2019_pn': (300, 10000, '0.3-10keV'),  # PI in eV
+    'xmm2022_pn': (300, 10000, '0.3-10keV'),
+}
+for key, (pi_lo, pi_hi, label) in TOA_BANDS.items():
+    out = os.path.join(config.EVENTS_DIR, f'{key}_{label}.evt')
+    n = energy_filter_events(config.EVENT_FILES[key], out, pi_lo, pi_hi,
+                             [f'pipeline/01_prepare_events.py {today}: PI {pi_lo}-{pi_hi} ({label}) selection'])
+    print(f'{os.path.basename(out)}: {n} events')
+
+# NICER 2021A, 0.4-2 keV (within-observation TOAs)
 soft = os.path.join(config.EVENTS_DIR, 'nicer2021A_0.4-2keV.evt')
 n = energy_filter_events(config.EVENT_FILES['nicer2021A'], soft, 40, 200,
                          [f'pipeline/01_prepare_events.py {today}: PI 40-200 (0.4-2 keV) selection'])

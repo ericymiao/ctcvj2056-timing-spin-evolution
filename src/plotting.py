@@ -22,7 +22,7 @@ def paper_style(fontsize=13):
 
 
 # ---------------------------------------------------------------------------------------------
-# Periodograms (Figure 1 and Figure 9)
+# Periodograms (Figure 1 and Figure 8)
 # ---------------------------------------------------------------------------------------------
 
 def plot_periodogram(curves, figsize=(5, 3.6), xfmt=None, path=None):
@@ -51,7 +51,7 @@ def plot_periodogram(curves, figsize=(5, 3.6), xfmt=None, path=None):
 
 def plot_hires_periodogram(frequency, power, power_threshold, span_uhz=(33772.27, 33773.19),
                            xlim_uhz=(33771.75, 33773.75), ylim=(1050, 1800), path=None):
-    """High-resolution combined periodogram in microhertz with the 2-sigma power threshold (Figure 9, top right)."""
+    """High-resolution combined periodogram in microhertz with the 2-sigma power threshold (Figure 8, top right)."""
     with plt.rc_context(paper_style()):
         fig, ax = plt.subplots(figsize=(6.5, 4.3))
         ax.plot(frequency * 1e6, power, lw=1.5)
@@ -117,7 +117,7 @@ def plot_folded_hr(ext_phase, total, total_err, hr, hr_err, path=None):
 
 
 # ---------------------------------------------------------------------------------------------
-# Template (Figure 6)
+# Template (Figure 5)
 # ---------------------------------------------------------------------------------------------
 
 def plot_template(phases, template, nbins=50, path=None):
@@ -155,47 +155,11 @@ def plot_template(phases, template, nbins=50, path=None):
 
 
 # ---------------------------------------------------------------------------------------------
-# Orbital Roemer-delay search (Figure 4)
-# ---------------------------------------------------------------------------------------------
-
-def plot_demod_projection(Ts, max_powers, z2_null, z2_max, span=(6200, 6240), path=None):
-    """Maximum Z^2 versus trial orbital period with the unmodulated value (red) and the candidate range shaded."""
-    with plt.rc_context(paper_style()):
-        fig, ax = plt.subplots(figsize=(5.7 / 1.1, 3.6 / 1.1))
-        ax.plot(Ts, max_powers, lw=2)
-        ax.axhline(z2_null, alpha=0.8, lw=2, color='red')
-        ax.set_xlabel('Period (s)')
-        ax.set_ylabel(r'Max $Z^2$ Power')
-        ax.set_ylim(z2_null - 5, top=z2_max + 15)
-        ax.axvspan(span[0], span[1], alpha=0.15, color='darkviolet')
-        if path is not None:
-            fig.savefig(path)
-    return fig
-
-
-def plot_survival(sorted_z2, survival, x_fit_start, slope, intercept, observed_z2, z2_null, path=None):
-    """Survival function of the control distribution with its exponential tail fit and the observed peak."""
-    with plt.rc_context(paper_style()):
-        fig, ax = plt.subplots(figsize=(4, 3.6))
-        ax.step(sorted_z2, survival, alpha=1, lw=2.5, where='post')
-        x_extrap = np.linspace(x_fit_start, max(observed_z2 * 1.1, sorted_z2[-1] * 1.1), 200)
-        ax.semilogy(x_extrap, np.exp(slope * x_extrap + intercept), 'xkcd:bright red', lw=1.5)
-        ax.axvline(observed_z2, color='blue', lw=1.5, ls=(0, (3, 2)))
-        ax.set_xlabel(r'Max $Z^2$ Power')
-        ax.set_xlim(np.floor(z2_null), right=observed_z2 + 10)
-        ax.set_ylim(bottom=1e-5, top=2)
-        ax.set_ylabel('Survival Function')
-        if path is not None:
-            fig.savefig(path)
-    return fig
-
-
-# ---------------------------------------------------------------------------------------------
-# Pulsar timing residuals (Figures 7, 8, 9 bottom, 11, 12) and the initial-frequency chart (Figure 10)
+# Pulsar timing residuals (Figures 6, 7, 8 bottom, 10, 11) and the initial-frequency chart (Figure 9)
 # ---------------------------------------------------------------------------------------------
 
 def plot_toa_residuals(mjds, resids, errs, zero_line=False, ylim=None, path=None):
-    """Residuals of the five TOAs, one panel (Figure 11)."""
+    """Residuals of the five TOAs, one panel (Figure 10)."""
     with plt.rc_context(paper_style()):
         fig, ax = plt.subplots(figsize=(7, 2.5))
         ax.scatter(mjds, resids, marker='x', s=150, linewidths=2.5, color='firebrick', zorder=5)
@@ -212,7 +176,7 @@ def plot_toa_residuals(mjds, resids, errs, zero_line=False, ylim=None, path=None
 
 
 def plot_prefit_montage(panels, path=None):
-    """Three stacked pre-fit residual panels for successive initial models (Figure 7).
+    """Three stacked pre-fit residual panels for successive initial models (Figure 6).
 
     panels: list of (label, mjds, resids, errs).
     """
@@ -232,7 +196,7 @@ def plot_prefit_montage(panels, path=None):
 
 
 def plot_within_residuals(mjds, resids, errs, bar_width, ylim=(-0.2, 0.2), path=None):
-    """Residuals of the three within-observation TOAs, one small panel (Figure 8)."""
+    """Residuals of the three within-observation TOAs, one small panel (Figure 7)."""
     with plt.rc_context(paper_style(12)):
         fig, ax = plt.subplots(figsize=(4 / 1.2, 3 / 1.2))
         ax.set_ylim(*ylim)
@@ -247,7 +211,7 @@ def plot_within_residuals(mjds, resids, errs, bar_width, ylim=(-0.2, 0.2), path=
 
 
 def plot_resid_slopes_montage(panels, bar_width, path=None):
-    """Within-observation pre-fit residuals for the five candidate aliases (Figure 9, bottom).
+    """Within-observation pre-fit residuals for the five candidate aliases (Figure 8, bottom).
 
     panels: dict label -> (mjds, resids, errs, f0) for 'leftpeak2', 'leftpeak', 'rightpeak', 'rightpeak2', 'center'.
     """
@@ -271,7 +235,7 @@ def plot_resid_slopes_montage(panels, bar_width, path=None):
 
 
 def plot_error_ellipse(corr, sigmas, x_scale=1e-10, y_scale=1e-18, path=None):
-    """1, 2 and 3 sigma joint confidence ellipses of (F0, F1) with the marginal 1-sigma bands (Figure 12)."""
+    """1, 2 and 3 sigma joint confidence ellipses of (F0, F1) with the marginal 1-sigma bands (Figure 11)."""
     from scipy import linalg, stats
     vals, vecs = linalg.eigh(corr)
     with plt.rc_context(paper_style()):
@@ -295,7 +259,7 @@ def plot_error_ellipse(corr, sigmas, x_scale=1e-10, y_scale=1e-18, path=None):
 
 
 def plot_initial_frequency(labels, freqs, uncerts, delta_f, path=None):
-    """Successive initial-frequency estimates with their uncertainties and the tolerable error band (Figure 10)."""
+    """Successive initial-frequency estimates with their uncertainties and the tolerable error band (Figure 9)."""
     F_final = freqs[-1]
     with plt.rc_context(dict(matplotlib.rcParamsDefault)):
         fig, ax = plt.subplots(figsize=(13, 3))

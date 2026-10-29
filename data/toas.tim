@@ -1,13 +1,13 @@
 FORMAT 1
-C One TOA per observation (photon_toa.py, PINT 1.1.3, DE440), pipeline/02_make_toas.sh 2026-09-05
+C One TOA per observation (photon_toa.py, PINT 1.1.3, DE440), pipeline/02_make_toas.sh 2026-10-29
 C template data/template.gauss, model data/photon_toa_initial_model.par
 C xmm2019_pn: XMM, exposure 15761.0 s
 C nicer2021A: NICER, exposure 47605.1 s
 C nicer2021B: NICER, exposure 18507.1 s
 C xmm2022_pn: XMM, exposure 51156.7 s
 C nicer2024: NICER, exposure 40089.8 s
-photon_toa 0.000000 58780.5816243754692084 258316.523 @  -nsrc 5192.84 -nbkg 0.16 -exposure 15761.032186627388 -dphi -0.71917 -htest 194.37 -t XMM
-photon_toa 0.000000 59422.7725288963526069 86851.008 @  -nsrc 109566.71 -nbkg 3.29 -exposure 47605.0994630754 -dphi -0.86085 -htest 944.97 -t NICER
-photon_toa 0.000000 59524.3621949756937277 145405.775 @  -nsrc 45106.65 -nbkg 1.35 -exposure 18507.072545081377 -dphi -0.88546 -htest 424.81 -t NICER
-photon_toa 0.000000 59876.3380848420570232 180358.164 @  -nsrc 16222.51 -nbkg 0.49 -exposure 51156.74090695381 -dphi 0.04499 -htest 560.76 -t XMM
-photon_toa 0.000000 60554.6778224130602689 107158.315 @  -nsrc 97493.08 -nbkg 2.92 -exposure 40089.79410672188 -dphi -0.10784 -htest 637.86 -t NICER
+photon_toa 0.000000 58780.5816243619986371 258950.689 @  -nsrc 5178.84 -nbkg 0.16 -exposure 15761.032186627388 -dphi -0.71920 -htest 192.57 -t XMM
+photon_toa 0.000000 59422.7725286047482037 87050.433 @  -nsrc 89438.32 -nbkg 2.68 -exposure 47605.0994630754 -dphi -0.86170 -htest 1103.12 -t NICER
+photon_toa 0.000000 59524.3621955578566822 150510.827 @  -nsrc 37767.87 -nbkg 1.13 -exposure 18507.072545081377 -dphi -0.88376 -htest 487.33 -t NICER
+photon_toa 0.000000 59876.3380855793825530 185977.074 @  -nsrc 15379.54 -nbkg 0.46 -exposure 51156.74090695381 -dphi 0.04714 -htest 522.66 -t XMM
+photon_toa 0.000000 60554.6778226033007142 105850.138 @  -nsrc 85094.45 -nbkg 2.55 -exposure 40089.79410672188 -dphi -0.10728 -htest 731.64 -t NICER
