@@ -5,8 +5,6 @@ data/events/*.evt
 data/toas/
 *.fits
 *.evt
-*.nc
-results/logs/
 external/heasoft_stub/
 
 # Python

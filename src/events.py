@@ -1,7 +1,5 @@
 """Small FITS event-file utilities used by the pipeline scripts (numpy + astropy)."""
 
-import hashlib
-
 import numpy as np
 from astropy.io import fits
 from astropy.table import Table
@@ -24,15 +22,6 @@ def check_time_header(hdr):
     assert str(hdr['TIMEREF']).strip() == 'SOLARSYSTEM', f"TIMEREF = {hdr['TIMEREF']}, expected SOLARSYSTEM"
     return {'TIMESYS': str(hdr['TIMESYS']).strip(), 'TIMEREF': str(hdr['TIMEREF']).strip(), 'TIMEZERO': timezero,
             'TELESCOP': str(hdr.get('TELESCOP', '')).strip(), 'INSTRUME': str(hdr.get('INSTRUME', '')).strip()}
-
-
-def md5sum(path):
-    """MD5 hex digest of a file."""
-    h = hashlib.md5()
-    with open(path, 'rb') as f:
-        for chunk in iter(lambda: f.read(1 << 20), b''):
-            h.update(chunk)
-    return h.hexdigest()
 
 
 def energy_filter_events(in_path, out_path, pi_lo, pi_hi, history):

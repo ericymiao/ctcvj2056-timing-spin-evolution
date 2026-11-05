@@ -23,7 +23,6 @@ notebooks/            one notebook per section of the paper; each cell says whic
   02_xmm_timing       XMM-Newton periodograms and folded profiles                        (Figures 1, 2)
   03_nustar_timing    NuSTAR periodogram and folded profiles                             (Figures 1, 2)
   05_pulsar_timing    initial frequency, PINT fit for f and f-dot                        (Figures 6-11)
-  archive/            earlier exploratory notebooks (not maintained)
 pipeline/             scripts that produce the TOAs (NICERsoft photon_toa.py)
 src/                  library: data loaders, periodogram and folding tools, statistics, plotting
 data/                 TOAs, timing models, pulse template, GTI table (see data/README.md)
@@ -46,15 +45,6 @@ external/NICERsoft/   git submodule (commit 98f0ff9) with a one-line patch for P
    be skipped).
 4. Figures and numbers: run the notebooks in order (`pipeline/run_all.sh` does all of the above); the
    figures go to `paper_figures/` and each notebook prints the numbers it contributes to the paper.
-
-## Method in brief
-
-- **Periodograms and profiles** (`src/timing_analysis.py`): Z²₁ periodograms with the
-  frequency-uncertainty heuristic of the paper's Appendix A; exposure-corrected phase folding.
-- **Pulsar timing** (`pipeline/`, `notebooks/05_pulsar_timing.ipynb`): photon phases from
-  `photonphase`, a five-Gaussian template fitted with `nitemplate.py` to the 2021A profile
-  (`data/template.gauss`), one TOA per observation from `photon_toa.py`, and a PINT fit for f
-  and f-dot. The likelihood used for the TOAs is written out in the paper's Appendix B.
 
 ## Data sources
 

@@ -9,20 +9,6 @@ from stingray.gti import cross_gtis
 
 # ========================= Z^2 PERIODOGRAM FUNCTIONS =========================
 
-def bayesian_periodogram(frequencies, powers, nharm):
-    """Convert Z^2 powers to Bayesian posterior probabilities.
-
-    Args:
-        frequencies: frequency array
-        powers: Z^2_n power array
-        nharm: number of harmonics
-
-    Returns: posterior probability array
-    """
-    noise_variance = 2 * nharm
-    return np.exp(powers / noise_variance)
-
-
 def z2_confidence_interval(peak_power, nharm, sigma_level):
     """Get power confidence interval using noncentral chi-squared.
 
@@ -60,46 +46,6 @@ def _get_boundaries_from_level(x, y, level, x0):
         idx += 1
 
     return min_x, max_x
-
-
-def montgomery_frequency_uncertainty(peak_freq, peak_power, nharm, obs_time, n_events, sigma_level=1.0):
-    """Frequency uncertainty using Montgomery method.
-
-    Uses formula: sigma_f = (sqrt(6) / (pi*T)) / sqrt(2*(z_max - 2m))
-    Assumes strong detection (Z^2 >> 2n).
-
-    Args:
-        peak_freq: peak frequency (Hz)
-        peak_power: peak Z^2_n power
-        nharm: number of harmonics
-        obs_time: total observation time (seconds)
-        n_events: number of events
-        sigma_level: confidence level (default 1.0)
-
-    Returns: (freq_lower, freq_upper, freq_uncertainty)
-    """
-    if peak_power <= 2 * nharm:
-        raise ValueError(f"Peak power ({peak_power:.1f}) must be >> 2*nharm ({2*nharm})")
-    if obs_time <= 0 or n_events <= 0:
-        raise ValueError("obs_time and n_events must be positive")
-
-    delta_chi2 = peak_power - 2 * nharm
-    sigma_freq = sigma_level * (np.sqrt(6.0) / (np.pi * obs_time)) * (1.0 / np.sqrt(2.0 * delta_chi2))
-    freq_lower, freq_upper = peak_freq - sigma_freq, peak_freq + sigma_freq
-
-    peak_period = 1.0 / peak_freq
-    period_lower, period_upper = 1.0 / freq_upper, 1.0 / freq_lower
-    period_err_upper, period_err_lower = period_upper - peak_period, peak_period - period_lower
-
-    print("=" * 70)
-    print(f"MONTGOMERY METHOD ({sigma_level}-sigma):")
-    print(f"  Detection: Z^2_n = {peak_power:.1f}, delta_chi2 = {delta_chi2:.1f}")
-    print(f"  T = {obs_time:.1f} s, m = {nharm}")
-    print(f"  Frequency: {peak_freq:.15e} +/- {sigma_freq:.6e} Hz")
-    print(f"  Period:    {peak_period:.15e} +{period_err_upper:.6e} -{period_err_lower:.6e} s")
-    print("=" * 70)
-
-    return freq_lower, freq_upper, sigma_freq
 
 
 def get_frequency_uncertainty(frequencies, powers, peak_freq, peak_power, nharm, sigma_level):
