@@ -8,8 +8,11 @@ template-matched times of arrival (TOAs):
 
 | quantity | value |
 |---|---|
-| spin period | P = 29.60968585 ± 3.6e-8 s |
+| spin period | P = 29.60968586 ± 7.7e-8 s |
 | spin period derivative | Ṗ = (−0.2 ± 1.8) × 10⁻¹⁵ s s⁻¹ |
+
+The spin evolution code of the paper (Section 6) is not included. It remains proprietary and is
+owned by Sudip Bhattacharyya and Sayantan Bhattacharya.
 
 ## Layout
 
@@ -25,15 +28,17 @@ pipeline/             scripts that produce the TOAs (NICERsoft photon_toa.py)
 src/                  library: data loaders, periodogram and folding tools, statistics, plotting
 data/                 TOAs, timing models, pulse template, GTI table (see data/README.md)
 paper_figures/        the figures of the paper, written by the notebooks
-external/NICERsoft/   git submodule (commit 98f0ff9) with a one-line patch for PINT 1.1.3
+external/NICERsoft/   git submodule (commit 98f0ff9) with a one-line patch for PINT 1.1.3; empty in a ZIP download,
+                      where pipeline/setup_nicersoft.sh fetches it
 ```
 
 ## Reproducing the paper
 
 1. Environment: Python 3.13 with the packages in `requirements.txt` (PINT 1.1.3, Stingray 2.2.10,
-   HENDRICS 8.1). `bash pipeline/setup_nicersoft.sh` fetches NICERsoft and applies the patch.
+   HENDRICS 8.1). Set `CTCV_PYTHON` to that Python, then `bash pipeline/setup_nicersoft.sh` fetches
+   NICERsoft and applies the patch.
 2. Data: cleaned, barycentered event files in the layout described in `src/config.py`
-   (`CTCV_DATA_DIR`). Event screening and barycentering follow Section 2 of the paper
+   (`CTCV_DATA_DIR`). Event screening and barycentering follow Section 3 of the paper
    (HEASoft/NICERDAS, SAS, NuSTARDAS); the HENDRICS event files are made with
    `HENreadevents` and `HENcalibrate`.
 3. TOAs: `python pipeline/01_prepare_events.py` (energy bands of Section 3 of the paper) then `bash pipeline/02_make_toas.sh`
@@ -50,6 +55,21 @@ external/NICERsoft/   git submodule (commit 98f0ff9) with a one-line patch for P
   `photonphase`, a five-Gaussian template fitted with `nitemplate.py` to the 2021A profile
   (`data/template.gauss`), one TOA per observation from `photon_toa.py`, and a PINT fit for f
   and f-dot. The likelihood used for the TOAs is written out in the paper's Appendix B.
+
+## Data sources
+
+The event files are not included. The raw observations are public:
+
+| mission | ObsIDs | archive |
+|---|---|---|
+| XMM-Newton | 0842570101, 0902500101 | XMM-Newton Science Archive |
+| NICER | 4592010200, 4592010300, 7656010100 | HEASARC |
+| NuSTAR | 30801006002 | HEASARC |
+
+## License
+
+MIT (see `LICENSE`). NICERsoft is a separate MIT-licensed project by Paul Ray; it is fetched by
+`pipeline/setup_nicersoft.sh` and is not part of this archive.
 
 ## Citation
 

@@ -1,0 +1,24 @@
+{
+    "title": "CTCV J2056-3014 X-ray timing: code and data products",
+    "upload_type": "software",
+    "version": "1.0.0",
+    "access_right": "open",
+    "license": "mit",
+    "language": "eng",
+    "creators": [
+        {
+            "name": "Miao, Eric",
+            "orcid": "0009-0009-6455-3804",
+            "affiliation": "Columbia University"
+        }
+    ],
+    "description": "<p>Code and data products for the X-ray timing analysis in Miao et al., <em>Precision X-ray Timing Methods and Spin Evolution Modeling for the Rapidly Rotating Cataclysmic Variable CTCV J2056-3014</em>. The archive holds the Z<sup>2</sup> periodogram and pulse-profile notebooks, the scripts that make times of arrival, the five-Gaussian pulse template, the times of arrival, the timing models including the fitted ephemeris (data/timing_model_final.par), and the paper figures they produce. README.md describes the layout and how to reproduce the results, and data/README.md describes each data file.</p><p>The spin evolution code is not included. It remains proprietary and is owned by Sudip Bhattacharyya and Sayantan Bhattacharya.</p><p>Data sources: XMM-Newton ObsIDs 0842570101 and 0902500101 (XMM-Newton Science Archive); NICER ObsIDs 4592010200, 4592010300 and 7656010100 and NuSTAR ObsID 30801006002 (HEASARC).</p>",
+    "keywords": [
+        "cataclysmic variable stars",
+        "DQ Herculis stars",
+        "white dwarf stars",
+        "stellar rotation",
+        "pulsar timing method",
+        "CTCV J2056-3014"
+    ]
+}

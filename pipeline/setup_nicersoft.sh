@@ -5,7 +5,14 @@
 set -e
 cd "$(dirname "$0")/.."
 
-git submodule update --init external/NICERsoft
+# A GitHub or Zenodo ZIP has no .git folder, so the submodule command cannot run there
+if [ -d .git ]; then
+    git submodule update --init external/NICERsoft
+elif [ ! -f external/NICERsoft/scripts/photon_toa.py ]; then
+    rm -rf external/NICERsoft
+    git clone https://github.com/paulray/NICERsoft.git external/NICERsoft
+    git -C external/NICERsoft checkout 98f0ff9
+fi
 
 # The unpatched file still passes include_gps to get_XMM_TOAs; patch only in that case
 if grep -q "include_gps=args.use_gps" external/NICERsoft/scripts/photon_toa.py; then
@@ -16,5 +23,5 @@ else
 fi
 
 # Smoke test with the pipeline's Python
-PY=$(/opt/miniconda3/envs/CTCV_PINT/bin/python -c "import sys; print(sys.executable)")
+PY="${CTCV_PYTHON:-/opt/miniconda3/envs/CTCV_PINT/bin/python}"
 "$PY" external/NICERsoft/scripts/photon_toa.py --help > /dev/null && echo "photon_toa.py --help OK ($PY)"
